@@ -8,6 +8,10 @@ requirements = []
 path = "contracts/energy-grid-registry.clar"
 depends_on = []
 
+[contracts.energy-metering]
+path = "contracts/energy-metering.clar"
+depends_on = []
+
 [contracts.energy-token]
 path = "contracts/energy-token.clar"
 depends_on = []
