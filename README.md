@@ -1,152 +1,173 @@
 # GridFlow
 
 ## Project Overview
-GridFlow is a decentralized energy distribution network leveraging the Stacks blockchain for transparent, secure energy trading and grid management.
+GridFlow is a decentralized energy distribution network leveraging the Stacks blockchain for transparent, secure energy trading and grid management. The platform enables peer-to-peer energy trading with a comprehensive marketplace system, automated settlement, and secure metering infrastructure.
 
 ### Key Features
 - Decentralized energy grid participant registration and management
-- Transparent, blockchain-based energy trading
+- Peer-to-peer energy trading marketplace with real-time pricing
+- Fungible energy tokens for standardized trading units
+- Smart meter integration with verification system
 - Secure grid operations and maintenance
+- Automated trade settlement and dispute resolution
 
 ### Project Description
-GridFlow aims to revolutionize the energy distribution industry by providing a decentralized platform for energy grid participants to register, trade energy, and manage grid operations. By leveraging the Stacks blockchain, GridFlow offers a transparent, secure, and tamper-resistant system for energy distribution, enabling efficient and trustworthy energy trading and grid management.
+GridFlow revolutionizes energy distribution by providing a decentralized platform for energy trading and grid management. By leveraging the Stacks blockchain, GridFlow offers a transparent, secure, and efficient system for energy distribution. The platform combines participant registration, energy trading, tokenization, and metering to create a complete ecosystem for decentralized energy markets.
 
 ## Contract Architecture
 
 ### energy-grid-registry.clar
-The `energy-grid-registry` contract is the main smart contract for GridFlow's energy grid participant registration and management system. It provides the following functionality:
+The core registration and access control system for GridFlow participants. Enhanced with trading metadata support.
 
 **Data Structures**:
-- `grid-participants`: A map that stores information about registered energy grid participants, including their principal address, energy production/consumption details, and grid role.
-- `pending-registrations`: A map that stores information about pending grid participant registration requests.
+- `grid-participants`: Stores participant information including trading capabilities
+- `pending-registrations`: Manages registration requests
+- `participant-metadata`: Enhanced trading statistics and reputation data
 
 **Public Functions**:
-- `register-participant`: Allows an energy grid participant to register with the system, providing their details and requesting grid access.
-- `approve-registration`: Enables an authorized grid operator to approve a pending registration request.
-- `update-participant-info`: Allows a registered grid participant to update their information, such as energy production/consumption details or grid role.
-- `remove-participant`: Enables an authorized grid operator to remove a registered grid participant from the system.
+- `register-participant`: Register new grid participants
+- `approve-registration`: Approve pending registrations
+- `update-participant-info`: Update participant information
+- `remove-participant`: Remove participants from the system
+- `update-reputation-score`: Modify participant reputation based on trading history
+- `record-energy-transaction`: Log completed energy trades
 
-**Permissions and Authentication**:
-- The `register-participant` function can be called by any principal.
-- The `approve-registration` and `remove-participant` functions can only be called by authorized grid operators.
-- The `update-participant-info` function can only be called by the associated grid participant.
+### energy-trading.clar
+The marketplace contract enabling peer-to-peer energy trading.
+
+**Key Features**:
+- Energy listing management
+- Dynamic pricing mechanisms
+- Automated trade settlement
+- Escrow system for secure transactions
+- Dispute resolution system
+
+**Public Functions**:
+- `create-energy-listing`: List energy for sale
+- `purchase-energy`: Buy listed energy
+- `place-bid`: Bid on auction-style listings
+- `finalize-auction`: Complete auction-style sales
+- `confirm-delivery`: Verify energy delivery
+- `settle-payment`: Process payment after delivery
+- `open-dispute`: Initiate dispute resolution
+
+### energy-token.clar
+A SIP-010 compliant fungible token representing standardized energy units.
+
+**Features**:
+- Fungible energy unit representation
+- Standard token operations (transfer, mint, burn)
+- Role-based minting and burning permissions
+- Integration with trading system
+
+**Key Functions**:
+- `mint`: Create new energy tokens
+- `burn`: Remove tokens from circulation
+- `transfer`: Transfer tokens between participants
+- `get-balance`: Check token holdings
+
+### energy-metering.clar
+Smart meter integration and verification system.
+
+**Features**:
+- Smart meter registration and management
+- Energy reading verification
+- Dispute resolution for readings
+- Production/consumption tracking
+
+**Key Functions**:
+- `register-meter`: Add new smart meters
+- `submit-energy-reading`: Record meter readings
+- `verify-reading`: Validate submitted readings
+- `file-dispute`: Contest incorrect readings
+- `resolve-dispute`: Settle reading disputes
 
 ## Installation & Setup
 
-To set up the GridFlow project, follow these steps:
-
 1. Ensure you have Clarinet installed on your system.
-2. Clone the GridFlow repository: `git clone https://github.com/gridflow/gridflow.git`.
-3. Navigate to the project directory: `cd gridflow`.
-4. Install the project dependencies: `npm install`.
-5. Run the Clarinet development environment: `clarinet dev`.
+2. Clone the GridFlow repository: `git clone https://github.com/gridflow/gridflow.git`
+3. Navigate to the project directory: `cd gridflow`
+4. Install the project dependencies: `npm install`
+5. Run the Clarinet development environment: `clarinet dev`
 
 ## Usage Guide
 
-### Registering a Grid Participant
-To register as a new grid participant, call the `register-participant` function, providing your principal address and grid details:
-
-```javascript
-(register-participant 'ABCD1234 100 "producer")
+### Participant Registration
+```clarity
+(register-participant 'ABCD1234 PARTICIPANT-TYPE-PRODUCER "location-data")
 ```
 
-This will add your registration request to the `pending-registrations` map, awaiting approval from an authorized grid operator.
+### Energy Trading
+```clarity
+;; List energy for sale
+(create-energy-listing u1000 u500 PRICING-FIXED u0)
 
-### Approving a Registration Request
-Grid operators can approve pending registration requests by calling the `approve-registration` function, passing the principal address of the requesting participant:
+;; Purchase energy
+(purchase-energy u1)
 
-```javascript
-(approve-registration 'ABCD1234)
+;; Place bid (for auction listings)
+(place-bid u1 u550)
 ```
 
-This will move the participant from the `pending-registrations` map to the `grid-participants` map, granting them access to the energy grid.
+### Energy Token Operations
+```clarity
+;; Transfer energy tokens
+(transfer u100 tx-sender 'RECIPIENT none)
 
-### Updating Participant Information
-Registered grid participants can update their information, such as energy production/consumption details or grid role, by calling the `update-participant-info` function:
-
-```javascript
-(update-participant-info 'ABCD1234 200 "consumer")
+;; Check balance
+(get-balance 'ADDRESS)
 ```
 
-### Removing a Participant
-Grid operators can remove a registered participant from the system by calling the `remove-participant` function, passing the principal address of the participant:
+### Smart Meter Integration
+```clarity
+;; Register a smart meter
+(register-meter 0x1234 METER-TYPE-PRODUCER "location")
 
-```javascript
-(remove-participant 'ABCD1234)
+;; Submit reading
+(submit-energy-reading 0x1234 block-height u100 0xSIGNATURE)
 ```
-
-This will remove the participant from the `grid-participants` map, revoking their access to the energy grid.
-
-## Testing
-
-The GridFlow project includes a comprehensive test suite for the `energy-grid-registry` contract, located in the `/workspace/tests/energy-grid-registry_test.ts` file. These tests cover all major functionalities and edge cases, ensuring the contract's behavior meets the expected requirements.
-
-To run the tests, use the Clarinet CLI:
-
-```
-clarinet test
-```
-
-The test suite includes the following key scenarios:
-
-1. Successful participant registration and approval
-2. Participant information update
-3. Participant removal by authorized grid operator
-4. Handling of invalid or unauthorized function calls
 
 ## Security Considerations
 
-The GridFlow project has several security measures in place to ensure the integrity and reliability of the energy grid management system:
-
-**Permissions and Authorization**:
-- The `approve-registration` and `remove-participant` functions can only be called by authorized grid operators, ensuring that only trusted parties can manage grid participants.
-- The `update-participant-info` function can only be called by the associated grid participant, preventing unauthorized updates to participant information.
-
-**Data Validation**:
-- The contract includes various assertions to validate input data, such as ensuring principal addresses are valid and grid role values are within the expected range.
-- The contract also performs checks to prevent duplicate registrations and ensure that only registered participants can update their information or be removed from the system.
-
-**Transparency and Auditability**:
-- By leveraging the Stacks blockchain, all grid participant registrations, updates, and removals are recorded on the distributed ledger, providing a transparent and auditable history of grid management activities.
+- **Role-Based Access Control**: Strict permissions for critical operations
+- **Escrow System**: Secure trade settlement with funds in escrow
+- **Verified Meters**: Only registered and verified meters can submit readings
+- **Dispute Resolution**: Formal process for handling disputes
+- **Multi-Stage Settlement**: Phased completion of trades with verification steps
 
 ## Examples
 
-### Participant Registration
-```javascript
-(register-participant 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM 100 "producer")
+### Complete Trading Cycle
+```clarity
+;; 1. Create energy listing
+(create-energy-listing u1000 u500 PRICING-FIXED u0)
+
+;; 2. Purchase energy
+(purchase-energy u1)
+
+;; 3. Confirm delivery
+(confirm-delivery u1)
+
+;; 4. Settle payment
+(settle-payment u1)
 ```
 
-Expected response:
-```
-(ok (tuple (participant-info (tuple (principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM) (energy-production 100) (grid-role "producer"))) (registration-status pending)))
+### Meter Reading Verification
+```clarity
+;; 1. Submit reading
+(submit-energy-reading 0x1234 block-height u100 0xSIGNATURE)
+
+;; 2. Verify reading
+(verify-reading 0x1234 block-height true "Verification notes")
 ```
 
-### Participant Approval
-```javascript
-(approve-registration 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM)
+### Token Operations
+```clarity
+;; Mint tokens to producer
+(mint u1000 'PRODUCER_ADDRESS)
+
+;; Transfer tokens
+(transfer u100 tx-sender 'CONSUMER_ADDRESS none)
 ```
 
-Expected response:
-```
-(ok (tuple (participant-info (tuple (principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM) (energy-production 100) (grid-role "producer"))) (registration-status approved)))
-```
-
-### Participant Information Update
-```javascript
-(update-participant-info 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM 200 "consumer")
-```
-
-Expected response:
-```
-(ok (tuple (participant-info (tuple (principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM) (energy-consumption 200) (grid-role "consumer"))) (registration-status approved)))
-```
-
-### Participant Removal
-```javascript
-(remove-participant 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM)
-```
-
-Expected response:
-```
-(ok true)
-```
+The enhanced GridFlow system provides a complete solution for decentralized energy trading, from participant registration to final settlement, with robust security measures and dispute resolution mechanisms.
