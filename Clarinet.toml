@@ -8,6 +8,10 @@ requirements = []
 path = "contracts/energy-grid-registry.clar"
 depends_on = []
 
+[contracts.energy-trading]
+path = "contracts/energy-trading.clar"
+depends_on = []
+
 [repl]
 costs_version = 2
 parser_version = 2
