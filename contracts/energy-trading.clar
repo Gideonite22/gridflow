@@ -339,41 +339,7 @@
   )
 )
 
-;; Place a bid on an auction listing
-(define-public (place-bid (listing-id uint) (bid-price-per-unit uint))
-  (let (
-    (listing (unwrap! (map-get? energy-listings { id: listing-id }) ERR-LISTING-NOT-FOUND))
-    (current-highest-bid (default-to u0 (get price-per-unit listing)))
-  )
-    ;; Validate the bid
-    (asserts! (is-registered-as tx-sender PARTICIPANT-TYPE-CONSUMER) ERR-NOT-REGISTERED)
-    (asserts! (is-eq (get state listing) LISTING-STATE-ACTIVE) ERR-LISTING-CLOSED)
-    (asserts! (is-eq (get pricing-model listing) PRICING-AUCTION) (err u206)) ;; Must be an auction
-    (asserts! (> bid-price-per-unit current-highest-bid) (err u207)) ;; Bid must be higher
-    (asserts! (>= bid-price-per-unit (get min-price listing)) ERR-PRICE-TOO-LOW)
-    (asserts! (not (is-eq tx-sender (get seller listing))) ERR-CANNOT-BUY-OWN-LISTING)
-    
-    ;; Record the bid
-    (map-set listing-bids
-      { listing-id: listing-id, bidder: tx-sender }
-      {
-        price-per-unit: bid-price-per-unit,
-        timestamp: block-height
-      }
-    )
-    
-    ;; Update the listing with the new highest bid
-    (map-set energy-listings
-      { id: listing-id }
-      (merge listing {
-        price-per-unit: bid-price-per-unit,
-        buyer: (some tx-sender)
-      })
-    )
-    
-    (ok true)
-  )
-)
+
 
 ;; Finalize an auction and handle payment
 (define-public (finalize-auction (listing-id uint))

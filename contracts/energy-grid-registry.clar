@@ -1,4 +1,3 @@
-```clarity
 ;; GridFlow Energy Grid Registry Contract
 ;; Purpose: Manage participant registration and access control for decentralized energy distribution
 ;; Version: 1.1.0 - Enhanced with energy trading support metadata

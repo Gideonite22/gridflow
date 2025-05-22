@@ -63,36 +63,6 @@
 (define-read-only (get-balance (account principal))
   (ok (default-to u0 (map-get? token-balances account)))
 )
-
-;; Transfers tokens from sender to recipient
-(define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
-  (begin
-    ;; Check that sender is the caller or that the caller is authorized to transfer
-    (asserts! (or (is-eq tx-sender sender) (is-approved-operator tx-sender sender)) ERR-NOT-AUTHORIZED)
-    
-    ;; Check that amount is greater than 0
-    (asserts! (> amount u0) ERR-INVALID-AMOUNT)
-    
-    ;; Check that sender != recipient for clarity
-    (asserts! (not (is-eq sender recipient)) ERR-INVALID-SENDER)
-    
-    ;; Check that sender has sufficient balance
-    (asserts! (>= (default-to u0 (map-get? token-balances sender)) amount) ERR-INSUFFICIENT-BALANCE)
-    
-    ;; Perform the transfer
-    (map-set token-balances sender 
-             (- (default-to u0 (map-get? token-balances sender)) amount))
-    (map-set token-balances recipient 
-             (+ (default-to u0 (map-get? token-balances recipient)) amount))
-    
-    ;; Return success with optional memo
-    (match memo
-      memo-data (print memo-data)
-      none true)
-    (ok true)
-  )
-)
-
 ;; GridFlow-specific functions
 
 ;; Mint new tokens (only callable by authorized minters)
